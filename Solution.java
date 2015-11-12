@@ -5,6 +5,8 @@ import java.math.*;
 import java.util.regex.*;
 
 public class Solution {
+    private final int MODULO = (new Double(Math.pow(10, 9))).intValue() + 7;
+    
     List<List<List<Entry>>> entries;
     int numOfFours, numOfFives, numOfSixes;
 
@@ -14,8 +16,9 @@ public class Solution {
         numOfSixes = sixes;
 
         initEntries();
-        printSum();
-        
+        generateEntries();
+        findSum();
+
     }
 
 
@@ -54,7 +57,7 @@ public class Solution {
     }
 
 
-    private void printSum() {
+    private void generateEntries() {
         for (int i = 0; i <= numOfFours; i++) {
             for (int j = 0; j <= numOfFives; j++) {
                 for (int k = 0; k <= numOfSixes; k++) {
@@ -63,53 +66,58 @@ public class Solution {
                     }
 
                     long sum = 0;
-                    int numberOfPerms = 0;
-                    int multiplier = (new Double(Math.pow(10, i + j + k - 1))).intValue();
-  
-
-                    System.out.print("\n[" + i + "][" + j + "][" + k + "]: ");
+                    long numberOfPerms = 0;
+                    int multiplier = (new Double(Math.pow(10, i + j + k - 1))).intValue() % MODULO;
 
                     if (0 < i) {
                         Entry entryFour = entries.get(i - 1).get(j).get(k);
-                        sum += 4 * multiplier * entryFour.getNumberOfPerms()
-                            + entryFour.getSum();
-                        numberOfPerms += entryFour.getNumberOfPerms();
-                        System.out.print("\t[" + (i - 1) + "][" + j + "][" + k + "]: " + entryFour.toString());
+                        sum += (4 * multiplier * entryFour.getNumberOfPerms()) % MODULO
+                            + entryFour.getSum() % MODULO;
+                        numberOfPerms += entryFour.getNumberOfPerms() % MODULO;
                     }
 
-                    if (0 < j) { 
+                    if (0 < j) {
                         Entry entryFive = entries.get(i).get(j - 1).get(k);
-                        sum += 5 * multiplier * entryFive.getNumberOfPerms()
-                            + entryFive.getSum();
-                        numberOfPerms += entryFive.getNumberOfPerms();
-                        System.out.print("\t[" + i + "][" + (j - 1) + "][" + k + "]: "  + entryFive.toString());
+                        sum += ((5 * multiplier % MODULO) * entryFive.getNumberOfPerms()) % MODULO
+                            + entryFive.getSum() % MODULO;
+                        numberOfPerms += entryFive.getNumberOfPerms() % MODULO;
                     }
-                    
-                    if (0 < k) { 
-                        Entry entrySix = entries.get(i).get(j).get(k - 1);
-                        sum += 6 * multiplier * entrySix.getNumberOfPerms()
-                            + entrySix.getSum();
-                        numberOfPerms += entrySix.getNumberOfPerms();
-                        System.out.print("\t[" + i + "][" + j + "][" + (k - 1) + "]: " + entrySix.toString());
-                    }
- 
-                    entries.get(i).get(j).get(k).setSum(sum);
-                    entries.get(i).get(j).get(k).setNumberOfPerms(numberOfPerms);
 
-                    System.out.println("\n" + entries.get(i).get(j).get(k).toString());
-                    
+                    if (0 < k) {
+                        Entry entrySix = entries.get(i).get(j).get(k - 1);
+                        sum += ((6 * multiplier % MODULO) * entrySix.getNumberOfPerms()) % MODULO
+                            + entrySix.getSum() % MODULO;
+                        numberOfPerms += entrySix.getNumberOfPerms() % MODULO;
+                    }
+
+                    entries.get(i).get(j).get(k).setSum(sum % MODULO);
+                    entries.get(i).get(j).get(k).setNumberOfPerms(numberOfPerms % MODULO);
+
+                }
+            }
+        }
+    }
+
+    
+    private void findSum() {
+        long sum = 0;
+        for (int i = 0; i <= numOfFours; i++) {
+            for (int j = 0; j <= numOfFives; j++) {
+                for (int k = 0; k <= numOfSixes; k++) {
+                    sum += entries.get(i).get(j).get(k).getSum() % MODULO;
                 }
             }
         }
 
-        System.out.println(entries.get(numOfFours).get(numOfFives).get(numOfSixes).toString());
+
+        System.out.println(sum % MODULO);
 
     }
 
 
     private class Entry {
         private long sum;
-        private int numberOfPerms;
+        private long numberOfPerms;
 
         public long getSum() {
             return sum;
@@ -119,11 +127,11 @@ public class Solution {
             this.sum = sum;
         }
 
-        public int getNumberOfPerms() {
+        public long getNumberOfPerms() {
             return numberOfPerms;
         }
 
-        public void setNumberOfPerms (int numberOfPerms) {
+        public void setNumberOfPerms (long numberOfPerms) {
             this.numberOfPerms = numberOfPerms;
         }
 
