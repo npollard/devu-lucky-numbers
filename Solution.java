@@ -5,7 +5,9 @@ import java.math.*;
 import java.util.regex.*;
 
 public class Solution {
+    private final BigInteger TEN = new BigInteger("10");
     private final int MODULO = (new Double(Math.pow(10, 9))).intValue() + 7;
+    private final BigInteger MODULO_BIG = new BigInteger(MODULO + "");
     
     List<List<List<Entry>>> entries;
     int numOfFours, numOfFives, numOfSixes;
@@ -38,7 +40,7 @@ public class Solution {
             }
             entries.add(fives);
         }
-       
+
         if (0 < numOfFours) {
             entries.get(1).get(0).get(0).setSum(4);
             entries.get(1).get(0).get(0).setNumberOfPerms(1);
@@ -52,41 +54,48 @@ public class Solution {
         if (0 < numOfSixes) {
             entries.get(0).get(0).get(1).setSum(6);
             entries.get(0).get(0).get(1).setNumberOfPerms(1);
-        }
 
+        }
     }
 
 
+    // find sum, number of permutations for numbers with EXACTLY i 4s, j 5s, k 6s
     private void generateEntries() {
+        long sum, numberOfPerms, multiplier;
+
         for (int i = 0; i <= numOfFours; i++) {
             for (int j = 0; j <= numOfFives; j++) {
                 for (int k = 0; k <= numOfSixes; k++) {
+
+                    // don't clobber values set in initEntries()
                     if (i + j + k <= 1) {
                         continue;
                     }
 
-                    long sum = 0;
-                    long numberOfPerms = 0;
-                    int multiplier = (new Double(Math.pow(10, i + j + k - 1))).intValue() % MODULO;
+                    sum = 0;
+                    numberOfPerms = 0;
+    
+                    // 10^(digits - 1) % (10^9 + 7)
+                    multiplier = (TEN).modPow(new BigInteger((i + j + k - 1) + ""), MODULO_BIG).longValue();
 
                     if (0 < i) {
                         Entry entryFour = entries.get(i - 1).get(j).get(k);
                         sum += (4 * multiplier * entryFour.getNumberOfPerms()) % MODULO
-                            + entryFour.getSum() % MODULO;
+                            + entryFour.getSum();
                         numberOfPerms += entryFour.getNumberOfPerms() % MODULO;
                     }
 
                     if (0 < j) {
                         Entry entryFive = entries.get(i).get(j - 1).get(k);
-                        sum += ((5 * multiplier % MODULO) * entryFive.getNumberOfPerms()) % MODULO
-                            + entryFive.getSum() % MODULO;
+                        sum += ((5 * multiplier) * entryFive.getNumberOfPerms()) % MODULO
+                            + entryFive.getSum();
                         numberOfPerms += entryFive.getNumberOfPerms() % MODULO;
                     }
 
                     if (0 < k) {
                         Entry entrySix = entries.get(i).get(j).get(k - 1);
-                        sum += ((6 * multiplier % MODULO) * entrySix.getNumberOfPerms()) % MODULO
-                            + entrySix.getSum() % MODULO;
+                        sum += ((6 * multiplier) * entrySix.getNumberOfPerms()) % MODULO
+                            + entrySix.getSum();
                         numberOfPerms += entrySix.getNumberOfPerms() % MODULO;
                     }
 
@@ -98,7 +107,8 @@ public class Solution {
         }
     }
 
-    
+
+    // find sum of numbers with i or less 4s, j or less 5s, k or less 6s    
     private void findSum() {
         long sum = 0;
         for (int i = 0; i <= numOfFours; i++) {
@@ -108,7 +118,6 @@ public class Solution {
                 }
             }
         }
-
 
         System.out.println(sum % MODULO);
 
@@ -121,23 +130,33 @@ public class Solution {
 
         public long getSum() {
             return sum;
+
         }
+
 
         public void setSum(long sum) {
             this.sum = sum;
+
         }
+
 
         public long getNumberOfPerms() {
             return numberOfPerms;
+
         }
+
 
         public void setNumberOfPerms (long numberOfPerms) {
             this.numberOfPerms = numberOfPerms;
+
         }
+
 
         public String toString() {
             return "<" + sum + ", " + numberOfPerms + ">";
+
         }
+
     }
 
 
